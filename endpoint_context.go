@@ -28,7 +28,7 @@ func (e EndpointContext) CreateUserEndpoint(c *gin.Context) {
 	err := decoder.Decode(userToCreate)
 	if err != nil {
 		errMsg := fmt.Sprintf("Unable to parse user params: %v", err)
-		c.String(500, errors.New(errMsg))
+		c.String(500, errMsg)
 		return
 	}
 
@@ -37,7 +37,7 @@ func (e EndpointContext) CreateUserEndpoint(c *gin.Context) {
 	err = db.Retrieve(userToCreate.DocId(), existingUser)
 	if err == nil {
 		errMsg := fmt.Sprintf("User already exists: %+v", *existingUser)
-		c.String(500, errors.New(errMsg))
+		c.String(500, errMsg)
 		return
 	}
 
@@ -48,7 +48,7 @@ func (e EndpointContext) CreateUserEndpoint(c *gin.Context) {
 	_, _, err = db.InsertWith(newUser, newUser.DocId())
 	if err != nil {
 		errMsg := fmt.Sprintf("Error creating new user: %v", err)
-		c.String(500, errors.New(errMsg))
+		c.String(500, errMsg)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (e EndpointContext) CreateDataFileEndpoint(c *gin.Context) {
 	// url field or throw an error.
 	if ok := c.Bind(&datafile); !ok {
 		errMsg := fmt.Sprintf("Invalid datafile")
-		c.String(400, errors.New(errMsg))
+		c.String(400, errMsg)
 		return
 	}
 
@@ -79,7 +79,7 @@ func (e EndpointContext) CreateDataFileEndpoint(c *gin.Context) {
 	datafile, err := datafile.Save(db)
 	if err != nil {
 		errMsg := fmt.Sprintf("Error creating new datafile: %v", err)
-		c.String(500, errors.New(errMsg))
+		c.String(500, errMsg)
 		return
 	}
 
@@ -99,7 +99,7 @@ func (e EndpointContext) CreateDataSetsEndpoint(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(dataset); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.String(400, errors.New(errMsg))
+		c.String(400, errMsg)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (e EndpointContext) CreateDataSetsEndpoint(c *gin.Context) {
 	// update with urls of training/testing artifacts (which don't exist yet)
 	if err := dataset.AddArtifactUrls(); err != nil {
 		errMsg := fmt.Sprintf("Error updating dataset: %+v.  Err: %v", dataset, err)
-		c.String(500, errors.New(errMsg))
+		c.String(500, errMsg)
 		return
 	}
 
@@ -136,7 +136,7 @@ func (e EndpointContext) CreateSolverEndpoint(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(solver); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.String(400, errors.New(errMsg))
+		c.String(400, errMsg)
 		return
 	}
 
@@ -185,7 +185,7 @@ func (e EndpointContext) CreateTrainingJob(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(trainingJob); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.String(400, errors.New(errMsg))
+		c.String(400, errMsg)
 		return
 	}
 
@@ -217,7 +217,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(classifier); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.String(400, errors.New(errMsg))
+		c.String(400, errMsg)
 		return
 	}
 
