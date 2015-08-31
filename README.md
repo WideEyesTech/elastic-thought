@@ -101,7 +101,7 @@ Run the following commands on your CoreOS box (to get in, you may need to `vagra
 **Start Sync Gateway Database**
 
 ```
-$ docker run -d --name sync-gateway -P couchbase/sync-gateway:1.1.0-forestdb_bucket sync_gateway https://gist.githubusercontent.com/tleyden/8051567cf62dfa8f89ca/raw/43d4abc9ef64cef7b4bbbdf6cb8ce80c456efd1f/gistfile1.txt
+$ docker run -d --name sync-gateway -P couchbase/sync-gateway:1.1.0-forestdb_bucket https://gist.githubusercontent.com/tleyden/8051567cf62dfa8f89ca/raw/43d4abc9ef64cef7b4bbbdf6cb8ce80c456efd1f/gistfile1.txt
 ```
 
 **Start ElasticThought REST API server**
