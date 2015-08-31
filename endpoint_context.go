@@ -3,7 +3,6 @@ package elasticthought
 import (
 	"crypto/sha1"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"path"
 	"strings"
@@ -107,7 +106,7 @@ func (e EndpointContext) CreateDataSetsEndpoint(c *gin.Context) {
 
 	// save dataset in db
 	if err := dataset.Insert(); err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -145,7 +144,7 @@ func (e EndpointContext) CreateSolverEndpoint(c *gin.Context) {
 	// save solver in db
 	solver, err := solver.Insert(db)
 	if err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -163,7 +162,7 @@ func (e EndpointContext) CreateSolverEndpoint(c *gin.Context) {
 	// ditto for specification-net-url
 	solver, err = solver.DownloadSpecToBlobStore(db, cbfs)
 	if err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -194,7 +193,7 @@ func (e EndpointContext) CreateTrainingJob(c *gin.Context) {
 	// save training job in db
 	trainingJob, err := trainingJob.Insert(db)
 	if err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -227,7 +226,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "Validating classifier")
 	if err := classifier.Validate(); err != nil {
 		logg.LogTo("REST", "Classifier failed validation: %v", err)
-		c.String(400, err)
+		c.String(400, err.Error())
 		return
 	}
 
@@ -235,7 +234,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "Save classifier to db")
 	err := classifier.Insert()
 	if err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -251,7 +250,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "Save classifier.prototxt %v to cbfs", classifier.SpecificationUrl)
 	destPath := path.Join(classifier.Id, "classifier.prototxt")
 	if err := saveUrlToBlobStore(classifier.SpecificationUrl, destPath, cbfs); err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 
 	}
@@ -260,7 +259,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "update the spec url to point to the classifier.prototxt in cbfs")
 	specUrlCbfs := fmt.Sprintf("%v%v", CBFS_URI_PREFIX, destPath)
 	if err := classifier.SetSpecificationUrl(specUrlCbfs); err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -279,7 +278,7 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 	classifier := NewClassifier(e.Configuration)
 	if err := classifier.Find(classifierId); err != nil {
 		err = fmt.Errorf("Unable to find classifier with id: %v.  Err: %v", classifierId, err)
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -290,7 +289,7 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 	request := c.Request
 	err := request.ParseMultipartForm(100000000) // ~100 MB
 	if err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
@@ -318,12 +317,12 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 
 		cbfsclient, err := e.Configuration.NewBlobStoreClient()
 		if err != nil {
-			c.String(500, err)
+			c.String(500, err.Error())
 			return
 		}
 
 		if err := saveUrlToBlobStore(url, dest, cbfsclient); err != nil {
-			c.String(500, err)
+			c.String(500, err.Error())
 			return
 		}
 
@@ -336,7 +335,7 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 	classifyJob.Results = emptyResults
 
 	if err := classifyJob.Insert(); err != nil {
-		c.String(500, err)
+		c.String(500, err.Error())
 		return
 	}
 
