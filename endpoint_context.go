@@ -28,7 +28,7 @@ func (e EndpointContext) CreateUserEndpoint(c *gin.Context) {
 	err := decoder.Decode(userToCreate)
 	if err != nil {
 		errMsg := fmt.Sprintf("Unable to parse user params: %v", err)
-		c.Fail(500, errors.New(errMsg))
+		c.String(500, errors.New(errMsg))
 		return
 	}
 
@@ -37,7 +37,7 @@ func (e EndpointContext) CreateUserEndpoint(c *gin.Context) {
 	err = db.Retrieve(userToCreate.DocId(), existingUser)
 	if err == nil {
 		errMsg := fmt.Sprintf("User already exists: %+v", *existingUser)
-		c.Fail(500, errors.New(errMsg))
+		c.String(500, errors.New(errMsg))
 		return
 	}
 
@@ -48,7 +48,7 @@ func (e EndpointContext) CreateUserEndpoint(c *gin.Context) {
 	_, _, err = db.InsertWith(newUser, newUser.DocId())
 	if err != nil {
 		errMsg := fmt.Sprintf("Error creating new user: %v", err)
-		c.Fail(500, errors.New(errMsg))
+		c.String(500, errors.New(errMsg))
 		return
 	}
 
@@ -69,7 +69,7 @@ func (e EndpointContext) CreateDataFileEndpoint(c *gin.Context) {
 	// url field or throw an error.
 	if ok := c.Bind(&datafile); !ok {
 		errMsg := fmt.Sprintf("Invalid datafile")
-		c.Fail(400, errors.New(errMsg))
+		c.String(400, errors.New(errMsg))
 		return
 	}
 
@@ -79,7 +79,7 @@ func (e EndpointContext) CreateDataFileEndpoint(c *gin.Context) {
 	datafile, err := datafile.Save(db)
 	if err != nil {
 		errMsg := fmt.Sprintf("Error creating new datafile: %v", err)
-		c.Fail(500, errors.New(errMsg))
+		c.String(500, errors.New(errMsg))
 		return
 	}
 
@@ -99,7 +99,7 @@ func (e EndpointContext) CreateDataSetsEndpoint(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(dataset); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.Fail(400, errors.New(errMsg))
+		c.String(400, errors.New(errMsg))
 		return
 	}
 
@@ -107,7 +107,7 @@ func (e EndpointContext) CreateDataSetsEndpoint(c *gin.Context) {
 
 	// save dataset in db
 	if err := dataset.Insert(); err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (e EndpointContext) CreateDataSetsEndpoint(c *gin.Context) {
 	// update with urls of training/testing artifacts (which don't exist yet)
 	if err := dataset.AddArtifactUrls(); err != nil {
 		errMsg := fmt.Sprintf("Error updating dataset: %+v.  Err: %v", dataset, err)
-		c.Fail(500, errors.New(errMsg))
+		c.String(500, errors.New(errMsg))
 		return
 	}
 
@@ -136,7 +136,7 @@ func (e EndpointContext) CreateSolverEndpoint(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(solver); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.Fail(400, errors.New(errMsg))
+		c.String(400, errors.New(errMsg))
 		return
 	}
 
@@ -145,7 +145,7 @@ func (e EndpointContext) CreateSolverEndpoint(c *gin.Context) {
 	// save solver in db
 	solver, err := solver.Insert(db)
 	if err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -153,7 +153,7 @@ func (e EndpointContext) CreateSolverEndpoint(c *gin.Context) {
 	cbfs, err := NewBlobStore(e.Configuration.CbfsUrl)
 	if err != nil {
 		errMsg := fmt.Errorf("Error creating cbfs client: %v", err)
-		c.Fail(500, errMsg)
+		c.String(500, errMsg)
 		return
 	}
 	logg.LogTo("REST", "cbfs: %+v", cbfs)
@@ -163,7 +163,7 @@ func (e EndpointContext) CreateSolverEndpoint(c *gin.Context) {
 	// ditto for specification-net-url
 	solver, err = solver.DownloadSpecToBlobStore(db, cbfs)
 	if err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -185,7 +185,7 @@ func (e EndpointContext) CreateTrainingJob(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(trainingJob); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.Fail(400, errors.New(errMsg))
+		c.String(400, errors.New(errMsg))
 		return
 	}
 
@@ -194,7 +194,7 @@ func (e EndpointContext) CreateTrainingJob(c *gin.Context) {
 	// save training job in db
 	trainingJob, err := trainingJob.Insert(db)
 	if err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -217,7 +217,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	// bind the input struct to the JSON request
 	if ok := c.Bind(classifier); !ok {
 		errMsg := fmt.Sprintf("Invalid input")
-		c.Fail(400, errors.New(errMsg))
+		c.String(400, errors.New(errMsg))
 		return
 	}
 
@@ -227,7 +227,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "Validating classifier")
 	if err := classifier.Validate(); err != nil {
 		logg.LogTo("REST", "Classifier failed validation: %v", err)
-		c.Fail(400, err)
+		c.String(400, err)
 		return
 	}
 
@@ -235,7 +235,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "Save classifier to db")
 	err := classifier.Insert()
 	if err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -243,7 +243,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	cbfs, err := NewBlobStore(e.Configuration.CbfsUrl)
 	if err != nil {
 		errMsg := fmt.Errorf("Error creating cbfs client: %v", err)
-		c.Fail(500, errMsg)
+		c.String(500, errMsg)
 		return
 	}
 
@@ -251,7 +251,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "Save classifier.prototxt %v to cbfs", classifier.SpecificationUrl)
 	destPath := path.Join(classifier.Id, "classifier.prototxt")
 	if err := saveUrlToBlobStore(classifier.SpecificationUrl, destPath, cbfs); err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 
 	}
@@ -260,7 +260,7 @@ func (e EndpointContext) CreateClassifierEndpoint(c *gin.Context) {
 	logg.LogTo("REST", "update the spec url to point to the classifier.prototxt in cbfs")
 	specUrlCbfs := fmt.Sprintf("%v%v", CBFS_URI_PREFIX, destPath)
 	if err := classifier.SetSpecificationUrl(specUrlCbfs); err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -279,7 +279,7 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 	classifier := NewClassifier(e.Configuration)
 	if err := classifier.Find(classifierId); err != nil {
 		err = fmt.Errorf("Unable to find classifier with id: %v.  Err: %v", classifierId, err)
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -290,7 +290,7 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 	request := c.Request
 	err := request.ParseMultipartForm(100000000) // ~100 MB
 	if err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
@@ -318,12 +318,12 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 
 		cbfsclient, err := e.Configuration.NewBlobStoreClient()
 		if err != nil {
-			c.Fail(500, err)
+			c.String(500, err)
 			return
 		}
 
 		if err := saveUrlToBlobStore(url, dest, cbfsclient); err != nil {
-			c.Fail(500, err)
+			c.String(500, err)
 			return
 		}
 
@@ -336,7 +336,7 @@ func (e EndpointContext) CreateClassificationJobEndpoint(c *gin.Context) {
 	classifyJob.Results = emptyResults
 
 	if err := classifyJob.Insert(); err != nil {
-		c.Fail(500, err)
+		c.String(500, err)
 		return
 	}
 
